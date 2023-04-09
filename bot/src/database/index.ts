@@ -8,33 +8,37 @@ export let db: Keyv | null = null; // store conversation id
 export let conversation_db: Keyv | null = null; // store conversation 
 
 export function createDB(namespace: string) {
-  console.log("keystore", KEYV_STORAGE_TYPE)
-  if (KEYV_STORAGE_TYPE === "file") {
-    // all the data will be storaged with json file 
-    db = new Keyv({ store: new KeyvFile({ filename: path.join(KEYV_STORAGE_PATH, `chat_gpt_bot.json`) }) })
-    conversation_db = new Keyv({ store: new KeyvFile({ filename: path.join(KEYV_STORAGE_PATH, `chat_gpt_conversation.json`) }) })
-    console.log("convesationdb", conversation_db)
-  } else {
-    // all the data will be storaged in the mem
-    // db = new Keyv()
+  try {
+    console.log("keystore", KEYV_STORAGE_TYPE)
+    if (KEYV_STORAGE_TYPE === "file") {
+      // all the data will be storaged with json file 
+      db = new Keyv({ store: new KeyvFile({ filename: path.join(KEYV_STORAGE_PATH, `chat_gpt_bot.json`) }) });
+      conversation_db = new Keyv({ store: new KeyvFile({ filename: path.join(KEYV_STORAGE_PATH, `chat_gpt_conversation.json`) }) });
+      console.log("convesationdb", conversation_db)
+    } else {
+      // all the data will be storaged in the mem
+      // db = new Keyv()
+    }
+  } catch (error) {
+    console.log("🚀 ~ file: index.ts:23 ~ createDB ~ error:", error)
   }
 }
 
-export function storeValue(key: string, value: string) {
+export function storeValue<T>(key: string, value: T) {
   db?.set(key, value);
 }
 
-export function readValue(key: string) {
+export function readValue<T>(key: string): Promise<T | undefined> {
   return db?.get(key);
 }
 
 export function storeConversationToDB(conversation: ConversationGraph) {
   const { roomId, ...rest } = conversation;
-  storeValue(roomId, JSON.stringify(rest));
+  storeValue(roomId, rest);
 }
 
-export async function readConversationFromDB(roomId: string) {
-  const result = await readValue(roomId);
-  if (result) return JSON.parse(result);
+export async function readConversationFromDB(roomId: string): Promise<ConversationGraph | null> {
+  const result = await readValue<ConversationGraph>(roomId);
+  if (result) return result;
   return null;
 }
