@@ -3,8 +3,8 @@ version: '3'
 services:
   matrix-web:
     image: ghcr.io/cinnyapp/cinny:v2.2.6
-    networks:
-      - proxy
+    # networks:
+    #   - proxy
     container_name: matrix-web
     restart: unless-stopped
     volumes:
@@ -30,8 +30,8 @@ services:
       CONDUIT_MAX_CONCURRENT_REQUESTS: 100
       CONDUIT_MAX_REQUEST_SIZE: 20_000_000  # in bytes, ~20 MB
     container_name: matrix
-    networks:
-      - proxy
+    # networks:
+    #   - proxy
 networks:
   proxy:
     external: true
